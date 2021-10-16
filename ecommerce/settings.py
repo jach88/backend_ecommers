@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
-
+from datetime import timedelta
 from pathlib import Path
 # from datetime import timedelta
 from os import environ
@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'manejoEc',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -134,3 +135,20 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# cuando se sobreescribe o se modifica el comportamiento original del modelo auth
+AUTH_USER_MODEL = 'manejoEc.UsuarioModel'
+
+# brinda toda la configuracion necesaria a mi libreria de DJangoRest Framework
+REST_FRAMEWORK = {
+    # sirve para indicar que la clase encargada de la authenticacion de las rutas de mi API REST las realizara la libreria rest_framework_simplejwt
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
+
+# encargada de la configuracion de la libreria django_restFramework jwt
+SIMPLE_JWT ={
+    'USER_ID_FIELD':'usuarioId',
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1)
+}

@@ -1,10 +1,17 @@
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.core.validators import MinValueValidator
+from django.db.models.fields import BooleanField
+from .authManager import ManejoUsuarios
+from django.contrib.auth.models import PermissionsMixin, AbstractBaseUser, AbstractUser
+
 
 # Create your models here.
-class  UsuarioModel(models.Model):
-    TIPO_USUARIO = [(1, 'ADMINISTRADOR'), (2,'MANTENEDOR'), (3,'CLIENTE')]
+
+
+class UsuarioModel(AbstractBaseUser,PermissionsMixin):
+    
+    TIPO_USUARIO = [(1,'ADMINISTRADOR'),(2,'OPERARIO'),(3,'CLIENTE')]
 
     usuarioId = models.AutoField(
         primary_key=True, null=False, db_column='id', unique=True)
@@ -19,12 +26,24 @@ class  UsuarioModel(models.Model):
         max_length=50, db_column='email', unique=True)
 
     usuarioTipo = models.IntegerField(choices=TIPO_USUARIO, db_column='tipo')
-
     password = models.TextField(null=True)
+
+    # configurar los campos base de nuestro modelo auth
+    is_staff = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+
+    # Todo lo siguiente es cuando vayamos a ingresar un administrador por consola
+
+    objects = ManejoUsuarios()
+
+    # definimos la columna que sera la encargada de validar  que el usuario sea unico e irrepetible
+    USERNAME_FIELD = 'usuarioCorreo'
+
+    REQUIRED_FIELDS = ['usuarioNombre','usuarioApellido','usuarioTipo','usuarioDni']
 
     class Meta:
         db_table = 'usuarios'
-    
+  
 
 # class PedidoModel(models.Model):
 #     pedidoId = models.AutoField(
@@ -73,3 +92,33 @@ class ProductoModel(models.Model):
 
     class Meta:
         db_table = 'productos'
+
+class PedidoModel(models.Model):
+    pedidoId = models.AutoField(primary_key=True, db_column='id', unique=True)
+
+    pedidoFecha = models.DateTimeField(auto_now_add=True, db_column='fecha')
+
+    pedidoTotal = models.DecimalField(
+        max_digits=5, decimal_places=2, db_column='total')
+
+    cliente = models.ForeignKey(
+        to=UsuarioModel, related_name='clientePedidos', db_column='cliente_id', on_delete=models.PROTECT)
+    class Meta:
+        db_table = 'pedidos'
+class DetallePedidoModel(models.Model):
+    detalleId = models.AutoField(primary_key=True, db_column='id', unique=True)
+
+    detalleCantidad = models.IntegerField(
+        db_column='cantidad', null=False, validators=[MinValueValidator(0, 'Valor no puede ser negativo')])
+
+    detalleSubTotal = models.DecimalField(
+        max_digits=7, decimal_places=2, db_column='sub_total')
+
+    producto = models.ForeignKey(
+        to=ProductoModel, related_name='productoDetalles', db_column='producto_id', on_delete=models.PROTECT)
+
+    pedido = models.ForeignKey(
+        to=PedidoModel, related_name='pedidoDetalles', db_column='pedido_id', on_delete=models.PROTECT)
+
+    class Meta:
+        db_table = 'detalles'
