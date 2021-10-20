@@ -1,6 +1,6 @@
-from django.test import TestCase
 from rest_framework.test import APITestCase
 from .models import MarcaModel
+
 
 class MarcasTestCase(APITestCase):
 
@@ -58,7 +58,7 @@ class MarcasTestCase(APITestCase):
         '''Deberia funcionar el actualizar'''
 
         objMarca :MarcaModel = MarcaModel.objects.all().first()
-        id = objMarca._getattribute_('marcaId')
+        id = objMarca.__getattribute__('marcaId')
         request = self.client.put(
             '/manejoEc/marca/'+str(id), data={ 
         "marcaNombre":"Nike2",
@@ -77,3 +77,10 @@ class MarcasTestCase(APITestCase):
 
         self.assertEqual(request.status_code,404)
         self.assertEqual(message,'Marca no encontrada')
+    
+
+
+
+    
+
+
