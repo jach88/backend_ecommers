@@ -67,6 +67,7 @@ class MarcaModel(models.Model):
 
     class Meta:
         db_table = 'marcas'
+        ordering=['marcaId']
 class ProductoModel(models.Model):
     productoId = models.AutoField(
         primary_key=True, null=False,db_column='id',unique=True)
@@ -92,6 +93,7 @@ class ProductoModel(models.Model):
 
     class Meta:
         db_table = 'productos'
+        ordering=['productoId']
 
 class PedidoModel(models.Model):
     pedidoId = models.AutoField(primary_key=True, db_column='id', unique=True)

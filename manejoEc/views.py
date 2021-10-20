@@ -9,6 +9,7 @@ from .models import DetallePedidoModel, MarcaModel, PedidoModel, ProductoModel, 
 from cloudinary import CloudinaryImage, CloudinaryVideo
 from cloudinary.uploader import upload, destroy
 from cloudinary import config
+from .utils import PaginacionPersonalizada
 from os import environ
 from django.db import transaction
 from dotenv import load_dotenv
@@ -41,10 +42,10 @@ class RegistroController(CreateAPIView):
 
 
 
-class MarcaController(ListCreateAPIView):
+class MarcasController(ListCreateAPIView):
     serializer_class = MarcaSerializer
     queryset = MarcaModel.objects.all()
-
+    pagination_class = PaginacionPersonalizada
     def post(self, request: Request):
         data = self.serializer_class(data=request.data)
         if data.is_valid():
@@ -52,38 +53,89 @@ class MarcaController(ListCreateAPIView):
             return Response(data={
                 'content':data.data,
                 'message': 'Marca creado exitosamente'
-            })
+            },status=201)
         else:
             return Response(data={
                 'message': 'Error al crear la Marca',
                 'content': data.errors
             }, status=400)
 
-    def get(self, request: Request):
-        data = self.serializer_class(instance=self.get_queryset(),many=True)
+    # def get(self, request: Request):
+    #     data = self.serializer_class(instance=self.get_queryset(),many=True)
+    #     return Response(data={
+    #         'message': None,
+    #         'content':data.data
+    #     })
+class MarcaController(RetrieveUpdateDestroyAPIView):
+    serializer_class = MarcaSerializer
+    queryset = MarcaModel.objects.all()
+
+    def delete(self, request: Request, id):
+
+        marcaEncontrada = self.get_queryset().filter(marcaId=id).first()
+
+        if not marcaEncontrada:
+            return Response(data={
+                'message': 'Marca no encontrada'
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            data = marcaEncontrada.delete()
+        except Exception as e:
+
+            return Response(data={
+                'message': e.args[0]
+            },status=403)
+
+        
         return Response(data={
-            'message': None,
-            'content':data.data
+            'message': 'Marca eliminada exitosamente',
+            
         })
+    def put(self, request: Request, id):
+        marcaEncontrada = self.get_queryset().filter(marcaId=id).first()
 
-
+        if marcaEncontrada is None:
+            return Response(data={
+                'message': 'Marca no encontrada',
+                'content': None
+            }, status=status.HTTP_404_NOT_FOUND)
+        data = self.serializer_class(data=request.data)
+        if data.is_valid():
+            data.update(instance=marcaEncontrada,
+                                validated_data=data.validated_data)
+            return Response(data={
+                "message": "Marca actualizada exitosamente",
+                "content": data.data
+            })
+        else:
+            return Response(data={
+                "message": "Error al actualizar la marca",
+                "content": data.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
 
 class ProductosController(ListCreateAPIView):
     serializer_class = ProductoSerializer
     queryset = ProductoModel.objects.all()
+    pagination_class = PaginacionPersonalizada
 
     def post(self,request: Request):
+
+        rpta :dict = request.data.copy()
+        talla = request.data.get('productoTalla')
+        listaTalla =  talla.replace(' ','').split(',')
+        rpta['productoTalla'] = listaTalla
         archivo = request.data.get('productoFoto')
-        resultado = upload(archivo,resource_type="image")
-        rpta: dict = request.data
+        resultado = ""
+        if archivo:
+            resultado = upload(archivo,resource_type="image")
         rpta['productoFoto']= resultado.get('url')
-        rpta['productoTalla'] = ["1","2"]
         data = self.serializer_class(data=rpta)
         
         if data.is_valid():
             data.save()
             return Response(data={
-                 'content': data.data,
+                'content': data.data,
                 'message': 'Producto creado exitosamente'
             })
         else:
@@ -92,12 +144,12 @@ class ProductosController(ListCreateAPIView):
                 'message': 'Error al crear el producto',
                 'content':data.errors
             })
-    def get(self, request: Request):
-        data = self.serializer_class(instance=self.get_queryset(),many=True)
-        return Response(data={
-            'message': None,
-            'content':data.data
-        })
+    # def get(self, request: Request):
+    #     data = self.serializer_class(instance=self.get_queryset(),many=True)
+    #     return Response(data={
+    #         'message': None,
+    #         'content':data.data
+    #     })
 
 class ProductoController(RetrieveUpdateDestroyAPIView):
     serializer_class = ProductoSerializer
@@ -115,13 +167,40 @@ class ProductoController(RetrieveUpdateDestroyAPIView):
         try:
             data = productoEncontrado.delete()
         except Exception as e:
-            print(e)
+            
+            return Response(data={
+                'message': e.args[0]
+            },status=403)
 
-        # data = PlatoModel.objects.filter(platoId=id).delete()
-        # (num_registros_eliminados, { platoModel: id })
+        
         return Response(data={
-            'message': 'Producto eliminado exitosamente'
+            'message': 'Producto eliminado exitosamente',
+            
         })
+    def put(self, request: Request, id):
+        productoEncontrado = ProductoModel.objects.filter(
+            productoId=id).first()
+        
+        if productoEncontrado is None:
+            return Response(data={
+                "message": "Producto no exite",
+                "content": None
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        data = self.serializer_class(data=request.data)
+        if data.is_valid():
+            data.update(instance=productoEncontrado,
+                                validated_data=data.validated_data)
+            return Response(data={
+                "message": "Pruducto actualizado exitosamente",
+                "content": data.data
+            })
+        else:
+            return Response(data={
+                "message": "Error al actualizar el producto",
+                "content": data.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+
         # return super().delete(request, *args, **kwargs)
 class VentaController(CreateAPIView):
     serializer_class = VentaSerializer
