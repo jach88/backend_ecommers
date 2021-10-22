@@ -6,16 +6,21 @@ on:
 jobs:
   build_and_test:
     runs-on: ubuntu-latest
+      
     services:
       postgres:
-        image: postgres:12.3-alpine
+        image: postgres
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: github_actions
-        ports:
-          - 5432:5432
-        options: --mount type=tmpfs,destination=/var/lib/postgresql/data --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+          POSTGRES_USER: ${{ secrets.DB_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.DB_NAME }}
+          POSTGRES_PORT: ${{ secrets.DB_PORT }}
+          POSTGRES_HOST: ${{ secrets.DB_HOST }}
+        options: >-
+          --health-cmd pg_isalready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     
     
     steps:
