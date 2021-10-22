@@ -20,4 +20,4 @@ jobs:
         run: pip3 install -r requirements.txt
 
       - name: Correr los Tests
-        run: python manage.py test -v 0
+        run: python ./manage.py test -v 0
