@@ -7,7 +7,7 @@ jobs:
   build_and_test:
     runs-on: ubuntu-latest
     services:
-      db:
+      postgres:
         image: postgres:12.3-alpine
         env:
           POSTGRES_USER: postgres
