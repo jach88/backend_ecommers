@@ -125,11 +125,24 @@ class ProductosController(ListCreateAPIView):
         talla = request.data.get('productoTalla')
         listaTalla =  talla.replace(' ','').split(',')
         rpta['productoTalla'] = listaTalla
+        idMarca = rpta.get('marca')
         archivo = request.data.get('productoFoto')
         resultado = ""
+        objMarca = MarcaModel.objects.filter(marcaId=idMarca).first()
+        if objMarca ==None:
+            return Response(data={
+                'message': 'La marca no existe',
+                'content': None
+            })
+
         if archivo:
-            resultado = upload(archivo,resource_type="image")
-        rpta['productoFoto']= resultado.get('url')
+            if archivo !=None:
+
+                resultado = upload(archivo,resource_type="image")
+                rpta['productoFoto']= resultado.get('url')
+            else:
+                rpta['productoFoto']=''
+            
         data = self.serializer_class(data=rpta)
         
         if data.is_valid():
@@ -139,11 +152,12 @@ class ProductosController(ListCreateAPIView):
                 'message': 'Producto creado exitosamente'
             })
         else:
-            destroy(resultado.get('public_id'))
+            if resultado:
+                destroy(resultado.get('public_id'))
             return Response(data={
                 'message': 'Error al crear el producto',
                 'content':data.errors
-            })
+            },status=400)
     # def get(self, request: Request):
     #     data = self.serializer_class(instance=self.get_queryset(),many=True)
     #     return Response(data={
@@ -156,8 +170,12 @@ class ProductoController(RetrieveUpdateDestroyAPIView):
     queryset = ProductoModel.objects.all()
 
     def delete(self, request: Request, id):
-        
-        productoEncontrado = self.get_queryset().filter(productoId=id).first()
+        objDetalle :DetallePedidoModel = DetallePedidoModel.objects.filter(producto=id).first()
+        if objDetalle:
+            return Response(data={
+                'message': 'este producto existe en la tabla Detalle'
+            },status=403)
+        productoEncontrado :ProductoModel = self.get_queryset().filter(productoId=id).first()
         
         if not productoEncontrado:
             return Response(data={
@@ -165,7 +183,15 @@ class ProductoController(RetrieveUpdateDestroyAPIView):
             }, status=status.HTTP_404_NOT_FOUND)
         
         try:
-            data = productoEncontrado.delete()
+            url =productoEncontrado.__getattribute__('productoFoto')
+            if url:
+                    
+                idFoto = url[-24:]
+                idPartition = idFoto.partition('.')
+                data = productoEncontrado.delete()
+                destroy(idPartition[0])
+            elif not url:
+                data = productoEncontrado.delete()
         except Exception as e:
             
             return Response(data={
@@ -177,6 +203,8 @@ class ProductoController(RetrieveUpdateDestroyAPIView):
             'message': 'Producto eliminado exitosamente',
             
         })
+
+
     def put(self, request: Request, id):
         productoEncontrado = ProductoModel.objects.filter(
             productoId=id).first()

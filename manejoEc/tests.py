@@ -1,5 +1,5 @@
 from rest_framework.test import APITestCase
-from .models import MarcaModel
+from .models import MarcaModel, ProductoModel
 
 
 class MarcasTestCase(APITestCase):
@@ -26,7 +26,7 @@ class MarcasTestCase(APITestCase):
 
     #Deberia funcionar este test
     def test_post_success(self):
-        '''Deberia retornar el producto creado'''
+        '''Deberia retornar la marca creaao'''
 
         request = self.client.post('/manejoEc/marcas', data={ 
         "marcaNombre":"Nike",
@@ -77,6 +77,50 @@ class MarcasTestCase(APITestCase):
 
         self.assertEqual(request.status_code,404)
         self.assertEqual(message,'Marca no encontrada')
+
+class ProductoTestCase(APITestCase):
+
+    def setUp(self):
+        MarcaModel(marcaNombre='nike',
+                    marcaDescripcion='zapatilla').save()
+        # ProductoModel(productoNombre='Nike',
+        #                 productoPrecio=20.76,
+        #                 productoFoto='/url',
+        #                 productoCantidad=7,
+        #                 productoTalla=['1','20','48'],
+        #                 marca=22).save()
+
+    def test_get_success(self):
+        '''Deberia retornar el producto creado'''
+
+        objMarca :MarcaModel = MarcaModel.objects.all().first()
+        # objProducto = ProductoModel.objects.all().first()
+        # print(objProducto)        
+        id = objMarca.__getattribute__('marcaId')
+        # print(id)
+        # print(id)
+        # print(id)
+        request = self.client.post('/manejoEc/productos', data={ 
+        "productoNombre": "Nike x2",
+        "productoPrecio": 89.90,
+        "productoCantidad": 12,
+        "productoTalla":'1,  2,  3,4  ',
+        "marca":int(id)
+        }, format='multipart')
+        message = request.data.get('message')
+        # id = request.data.get('content').get('productoId')
+        
+        # productoEncontrado = ProductoModel.objects.filter(productoId=id).first()
+        # marca: MarcaModel = MarcaModel.objects.all().first()
+        
+        # print(marca)
+        # print(productoEncontrado)
+        # print(request.status_code)
+
+        # self.assertEqual(request.status_code, 201)
+        self.assertEqual(message,'Producto creado exitosamente')
+        # self.assertIsNotNone(marcaEncontrado)                
+
     
 
 
