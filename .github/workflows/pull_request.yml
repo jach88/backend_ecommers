@@ -6,6 +6,8 @@ on:
 jobs:
   build_and_test:
     runs-on: ubuntu-latest
+    env:
+      DB_TEST: ${{ secrets.DB_NAME }}
       
     services:
       postgres:
