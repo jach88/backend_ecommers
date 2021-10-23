@@ -7,10 +7,10 @@ jobs:
   build_and_test:
     runs-on: ubuntu-latest
     env:
-      DB_TEST: DB_TEST
-      DB_HOST: localhost
-      DB_USER: DB_USER
-      DB_PASSWORD: DB_PASSWORD
+      DB_TEST: postgres
+      DB_HOST: postgres
+      DB_USER: user
+      DB_PASSWORD: postgres
       DB_NAME: DB_NAME
       DB_PORT: 5432
       
@@ -18,10 +18,10 @@ jobs:
       postgres:
         image: postgres
         env:
-          POSTGRES_USER: DB_USER
-          POSTGRES_PASSWORD: DB_PASSWORD
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: postgres
           POSTGRES_DB: DB_TEST
-          POSTGRES_HOST: localhost
+          POSTGRES_HOST: postgres
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
