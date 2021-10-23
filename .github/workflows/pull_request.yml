@@ -43,5 +43,5 @@ jobs:
       - name: Instalar librerias
         run: pip3 install -r requirements.txt
 
-      - name: Correr los Tests
+      - name: Correr los Tests (prueba)
         run: python3 manage.py test 
