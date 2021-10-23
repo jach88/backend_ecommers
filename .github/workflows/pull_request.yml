@@ -11,7 +11,7 @@ jobs:
       DB_HOST: postgres
       DB_USER: user
       DB_PASSWORD: postgres
-      DB_NAME: DB_NAME
+      DB_NAME: github.actions
       DB_PORT: 5432
       
     services:
@@ -20,8 +20,10 @@ jobs:
         env:
           POSTGRES_USER: user
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: DB_TEST
+          POSTGRES_DB: github-actions
           POSTGRES_HOST: postgres
+        ports:
+          - 5432:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -46,4 +48,4 @@ jobs:
         run: pip3 install -r requirements.txt
 
       - name: Correr los Tests
-        run: python3 manage.py test 
+        run: python3 manage.py test
