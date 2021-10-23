@@ -11,8 +11,8 @@ jobs:
       DB_HOST: DB_HOST
       DB_USER: DB_USER
       DB_PASSWORD: DB_PASSWORD
-      DB_NAME: DB_TEST
-      DB_PORT: DB_PORT
+      DB_NAME: DB_NAME
+      DB_PORT: 5432
       
     services:
       postgres:
@@ -21,7 +21,7 @@ jobs:
           POSTGRES_USER: DB_USER
           POSTGRES_PASSWORD: DB_PASSWORD
           POSTGRES_DB: DB_TEST
-          POSTGRES_PORT: DB_PORT
+          POSTGRES_PORT: 5432
           POSTGRES_HOST: DB_HOST
         options: >-
           --health-cmd pg_isready
