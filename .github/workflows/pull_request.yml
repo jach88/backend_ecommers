@@ -32,7 +32,10 @@ jobs:
     steps:
       - name: Validar el repositorio
         uses: actions/checkout@v2
-
+        
+      - name: Install OpenSSL
+        run: apt-get -qy update && apt-get -qy install openssl
+        
       - name: Validar Python
         uses: actions/setup-python@v2
         with:
