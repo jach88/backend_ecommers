@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DB_TEST: DB_TEST
-      DB_HOST: postgres
+      DB_HOST: localhost
       DB_USER: DB_USER
       DB_PASSWORD: DB_PASSWORD
       DB_NAME: DB_NAME
@@ -21,6 +21,7 @@ jobs:
           POSTGRES_USER: DB_USER
           POSTGRES_PASSWORD: DB_PASSWORD
           POSTGRES_DB: DB_TEST
+          POSTGRES_HOST: localhost
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -41,5 +42,5 @@ jobs:
       - name: Instalar librerias
         run: pip3 install -r requirements.txt
 
-      - name: Correr los Tests (prueba)
+      - name: Correr los Tests
         run: python3 manage.py test 
