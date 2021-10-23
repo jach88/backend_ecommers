@@ -10,6 +10,7 @@ class ComprobanteController(ListCreateAPIView):
     serializer_class = ComprobanteSerializer
 
     def post(self, request):
+        print('hola')
         data = self.serializer_class(data=request.data)
         if data.is_valid():
             print(data.validated_data)
