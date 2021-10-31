@@ -38,7 +38,7 @@ class MarcaSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MarcaModel
-
+        
         fields = '__all__'
 
 class ProductoSerializer(serializers.ModelSerializer):
@@ -47,9 +47,9 @@ class ProductoSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductoModel
 
-        # fields = ('productoNombre','productoPrecio')
+        # fields = ('productoNombre','productoPrecio','marca','productoTalla')
         fields = ('__all__')
-
+        
 class DetalleVentaSerializer(serializers.Serializer):
     cantidad = serializers.IntegerField(required=True)
     producto_id = serializers.IntegerField(required=True)

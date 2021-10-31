@@ -113,6 +113,19 @@ class MarcaController(RetrieveUpdateDestroyAPIView):
                 "message": "Error al actualizar la marca",
                 "content": data.errors
             }, status=status.HTTP_400_BAD_REQUEST)
+    def get(self, request: Request, id):
+        marcaEncontrada = MarcaModel.objects.filter(
+            marcaId=id).first()
+        if marcaEncontrada is None:
+            return Response(data={
+                "message": "Marca no exite",
+                "content": None
+            }, status=status.HTTP_404_NOT_FOUND)
+        serializador = MarcaSerializer(instance=marcaEncontrada)
+        return Response(data={
+                "message": "Marca Encontrada",
+                "content": serializador.data
+            })
 
 class ProductosController(ListCreateAPIView):
     serializer_class = ProductoSerializer
@@ -123,8 +136,13 @@ class ProductosController(ListCreateAPIView):
 
         rpta :dict = request.data.copy()
         talla = request.data.get('productoTalla')
+        
         listaTalla =  talla.replace(' ','').split(',')
+        
         rpta['productoTalla'] = listaTalla
+        rpta['productoPrecio'] = float(rpta.get('productoPrecio'))
+        rpta['productoCantidad'] = int(rpta.get('productoCantidad'))
+        
         idMarca = rpta.get('marca')
         archivo = request.data.get('productoFoto')
         resultado = ""
@@ -144,8 +162,9 @@ class ProductosController(ListCreateAPIView):
                 rpta['productoFoto']=''
             
         data = self.serializer_class(data=rpta)
-        
+        print(rpta)
         if data.is_valid():
+            
             data.save()
             return Response(data={
                 'content': data.data,
@@ -230,7 +249,23 @@ class ProductoController(RetrieveUpdateDestroyAPIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
         # return super().delete(request, *args, **kwargs)
+    def get(self, request: Request, id):
+        productoEncontrado = ProductoModel.objects.filter(
+            productoId=id).first()
+        if productoEncontrado is None:
+            return Response(data={
+                "message": "Producto no exite",
+                "content": None
+            }, status=status.HTTP_404_NOT_FOUND)
+        serializador = ProductoSerializer(instance=productoEncontrado)
+        return Response(data={
+                "message": "Pruducto Encontrado",
+                "content": serializador.data
+            })
+       
+        
 class VentaController(CreateAPIView):
+
     serializer_class = VentaSerializer
 
     def post(self, request : Request):
